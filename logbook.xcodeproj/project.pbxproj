@@ -6,14 +6,88 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		0FC921E52F5EF456001D6B59 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0FC921E42F5EF456001D6B59 /* WidgetKit.framework */; };
+		0FC921E72F5EF456001D6B59 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0FC921E62F5EF456001D6B59 /* SwiftUI.framework */; };
+		0FC921F82F5EF457001D6B59 /* logbookwidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 0FC921E22F5EF456001D6B59 /* logbookwidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		0FC921F62F5EF457001D6B59 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0F39476E2EFD1F87009FA494 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0FC921E12F5EF456001D6B59;
+			remoteInfo = logbookwidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		0FC921FD2F5EF457001D6B59 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				0FC921F82F5EF457001D6B59 /* logbookwidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		0F3947762EFD1F87009FA494 /* logbook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = logbook.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0FC921E22F5EF456001D6B59 /* logbookwidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = logbookwidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		0FC921E42F5EF456001D6B59 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		0FC921E62F5EF456001D6B59 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		0FC921FE2F5EF46E001D6B59 /* logbookwidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = logbookwidgetExtension.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		0FC921F92F5EF457001D6B59 /* Exceptions for "logbookwidget" folder in "logbookwidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 0FC921E12F5EF456001D6B59 /* logbookwidgetExtension */;
+		};
+		0FC922022F5EF8E8001D6B59 /* Exceptions for "logbook" folder in "logbookwidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Services/DashboardMetricsProvider.swift,
+				Services/SharedModelContainer.swift,
+				Widgets/DashboardWidget.swift,
+				Widgets/DashboardWidgetBundle.swift,
+			);
+			target = 0FC921E12F5EF456001D6B59 /* logbookwidgetExtension */;
+		};
+		0FC9220A2F5EFCF9001D6B59 /* Exceptions for "logbook" folder in "logbook" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Widgets/DashboardWidget.swift,
+				Widgets/DashboardWidgetBundle.swift,
+			);
+			target = 0F3947752EFD1F87009FA494 /* logbook */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		0F3947782EFD1F87009FA494 /* logbook */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				0FC9220A2F5EFCF9001D6B59 /* Exceptions for "logbook" folder in "logbook" target */,
+				0FC922022F5EF8E8001D6B59 /* Exceptions for "logbook" folder in "logbookwidgetExtension" target */,
+			);
 			path = logbook;
+			sourceTree = "<group>";
+		};
+		0FC921E82F5EF456001D6B59 /* logbookwidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				0FC921F92F5EF457001D6B59 /* Exceptions for "logbookwidget" folder in "logbookwidgetExtension" target */,
+			);
+			path = logbookwidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -26,13 +100,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		0FC921DF2F5EF456001D6B59 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0FC921E72F5EF456001D6B59 /* SwiftUI.framework in Frameworks */,
+				0FC921E52F5EF456001D6B59 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		0F39476D2EFD1F87009FA494 = {
 			isa = PBXGroup;
 			children = (
+				0FC921FE2F5EF46E001D6B59 /* logbookwidgetExtension.entitlements */,
 				0F3947782EFD1F87009FA494 /* logbook */,
+				0FC921E82F5EF456001D6B59 /* logbookwidget */,
+				0FC921E32F5EF456001D6B59 /* Frameworks */,
 				0F3947772EFD1F87009FA494 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,8 +127,18 @@
 			isa = PBXGroup;
 			children = (
 				0F3947762EFD1F87009FA494 /* logbook.app */,
+				0FC921E22F5EF456001D6B59 /* logbookwidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		0FC921E32F5EF456001D6B59 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0FC921E42F5EF456001D6B59 /* WidgetKit.framework */,
+				0FC921E62F5EF456001D6B59 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -55,10 +151,12 @@
 				0F3947722EFD1F87009FA494 /* Sources */,
 				0F3947732EFD1F87009FA494 /* Frameworks */,
 				0F3947742EFD1F87009FA494 /* Resources */,
+				0FC921FD2F5EF457001D6B59 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				0FC921F72F5EF457001D6B59 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				0F3947782EFD1F87009FA494 /* logbook */,
@@ -69,6 +167,28 @@
 			productName = logbook;
 			productReference = 0F3947762EFD1F87009FA494 /* logbook.app */;
 			productType = "com.apple.product-type.application";
+		};
+		0FC921E12F5EF456001D6B59 /* logbookwidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0FC921FA2F5EF457001D6B59 /* Build configuration list for PBXNativeTarget "logbookwidgetExtension" */;
+			buildPhases = (
+				0FC921DE2F5EF456001D6B59 /* Sources */,
+				0FC921DF2F5EF456001D6B59 /* Frameworks */,
+				0FC921E02F5EF456001D6B59 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				0FC921E82F5EF456001D6B59 /* logbookwidget */,
+			);
+			name = logbookwidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = logbookwidgetExtension;
+			productReference = 0FC921E22F5EF456001D6B59 /* logbookwidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -81,6 +201,9 @@
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					0F3947752EFD1F87009FA494 = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
+					0FC921E12F5EF456001D6B59 = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
 				};
@@ -100,12 +223,20 @@
 			projectRoot = "";
 			targets = (
 				0F3947752EFD1F87009FA494 /* logbook */,
+				0FC921E12F5EF456001D6B59 /* logbookwidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		0F3947742EFD1F87009FA494 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0FC921E02F5EF456001D6B59 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +253,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		0FC921DE2F5EF456001D6B59 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0FC921F72F5EF457001D6B59 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0FC921E12F5EF456001D6B59 /* logbookwidgetExtension */;
+			targetProxy = 0FC921F62F5EF457001D6B59 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		0F39477F2EFD1F88009FA494 /* Debug */ = {
@@ -178,6 +324,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				"INFOPLIST_FILE[sdk=*]" = logbook/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -251,11 +398,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = logbook/logbook.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = BGU4626AR9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				"INFOPLIST_FILE[sdk=*]" = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -283,11 +434,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = logbook/logbook.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = BGU4626AR9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -303,6 +457,68 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		0FC921FB2F5EF457001D6B59 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = logbookwidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = BGU4626AR9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = logbookwidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = logbookwidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.personal.logbook.logbookwidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		0FC921FC2F5EF457001D6B59 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = logbookwidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = BGU4626AR9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = logbookwidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = logbookwidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.personal.logbook.logbookwidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -327,6 +543,15 @@
 			buildConfigurations = (
 				0F3947822EFD1F88009FA494 /* Debug */,
 				0F3947832EFD1F88009FA494 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0FC921FA2F5EF457001D6B59 /* Build configuration list for PBXNativeTarget "logbookwidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0FC921FB2F5EF457001D6B59 /* Debug */,
+				0FC921FC2F5EF457001D6B59 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
