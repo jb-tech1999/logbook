@@ -4,7 +4,7 @@ import SwiftData
 enum AppModelContainer {
     static func makeSharedContainer() -> ModelContainer {
         do {
-            let schema = Schema([User.self, Car.self, LogEntry.self])
+            let schema = Schema([User.self, Car.self, LogEntry.self, Trip.self, TripPoint.self])
             let configuration = ModelConfiguration(
                 schema: schema,
                 isStoredInMemoryOnly: false,

@@ -12,5 +12,6 @@ import SwiftUI
 struct logbookwidgetBundle: WidgetBundle {
     var body: some Widget {
         logbookwidget()
+        TripLiveActivity()
     }
 }

@@ -40,6 +40,12 @@ struct ContentView: View {
                     }
                     .tabItem { Label("Map", systemImage: "map") }
                     .tag(Tab.map)
+                    
+                    NavigationStack {
+                        TripsView()
+                    }
+                    .tabItem { Label("Trips", systemImage: "map.fill") }
+                    .tag(Tab.trips)
 
                     NavigationStack {
                         LogsView(
@@ -232,6 +238,7 @@ extension ContentView {
     private enum Tab: Hashable {
         case dashboard
         case map
+        case trips
         case logs
         case vehicles
     }
