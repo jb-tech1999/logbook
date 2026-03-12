@@ -1,5 +1,8 @@
 import SwiftUI
 import SwiftData
+import OSLog
+
+private let contentLogger = Logger(subsystem: "com.jb-tech.logbook", category: "ContentView")
 
 struct ContentView: View {
 
@@ -8,15 +11,15 @@ struct ContentView: View {
 
     @AppStorage("isAuthenticated") private var isAuthenticated = true
     @AppStorage("lastCloudSyncAt") private var lastCloudSyncAt: Double = 0
-    @State private var email = "jandrebad@gmail.com"
-    @State private var password = "Rapoeli@123"
+    @State private var email = ""
+    @State private var password = ""
     @State private var isAuthenticating = false
     @State private var authError: String?
 
  //   private let cloudSyncService = CloudSyncService()
     @State private var isSyncingToCloud = false
 
-    @StateObject private var locationManager = LocationManager()
+    @State private var locationManager = LocationManager()
     @State private var selectedTab: Tab = .dashboard
 
     var body: some View {
@@ -67,7 +70,7 @@ struct ContentView: View {
                     // so the sign-in flow — which normally calls ensureUserRecord — is skipped.
                     // Guard here ensures a default user always exists before any view needs one.
                     ensureUserRecord(for: email.isEmpty ? "driver@logbook.app" : email,
-                                     password: password.isEmpty ? "default" : password)
+                                     password: "default")
                 }
             } else {
                 authenticationGate
@@ -168,7 +171,12 @@ struct ContentView: View {
         let currentPassword = password
 
         Task {
-            try? await Task.sleep(nanoseconds: 1_000_000_000)
+            do {
+                try await Task.sleep(for: .seconds(1))
+            } catch {
+                contentLogger.error("Sign-in delay task interrupted: \(error)")
+            }
+
             await MainActor.run {
                 isAuthenticated = true
                 isAuthenticating = false
@@ -197,7 +205,14 @@ struct ContentView: View {
             }
         )
 
-        if let results = try? modelContext.fetch(descriptor), !results.isEmpty {
+        do {
+            let results = try modelContext.fetch(descriptor)
+            if !results.isEmpty {
+                return
+            }
+        } catch {
+            contentLogger.error("Failed to fetch user records during bootstrap: \(error)")
+            authError = "Unable to access your profile right now. Please try again."
             return
         }
 
@@ -211,7 +226,13 @@ struct ContentView: View {
         )
 
         modelContext.insert(user)
-        try? modelContext.save()
+
+        do {
+            try modelContext.save()
+        } catch {
+            contentLogger.error("Failed to save bootstrapped user record: \(error)")
+            authError = "We couldn't save your profile. Please try again."
+        }
     }
 
     // @MainActor

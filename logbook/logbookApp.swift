@@ -9,6 +9,9 @@ import SwiftUI
 import SwiftData
 import UIKit
 import CarPlay
+import OSLog
+
+private let appLogger = Logger(subsystem: "com.jb-tech.logbook", category: "App")
 
 // MARK: - App Delegate for CarPlay
 
@@ -43,42 +46,44 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct logbookApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @StateObject private var tripTrackingService = TripTrackingService()
+    @State private var tripTrackingService = TripTrackingService()
     
     private let sharedContainer = AppModelContainer.makeSharedContainer()
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(tripTrackingService)  // Make available to all views
-                .onOpenURL { url in
-                    handleDeepLink(url)
-                }
-                .task {
-                    let context = ModelContext(sharedContainer)
-                    
-                    // Set up trip tracking service
-                    await MainActor.run {
-                        tripTrackingService.setModelContext(context)
-                        appDelegate.tripTrackingService = tripTrackingService
-                        appDelegate.modelContext = context
+            if let container = sharedContainer {
+                ContentView()
+                    .environment(tripTrackingService)
+                    .onOpenURL { url in
+                        handleDeepLink(url)
                     }
-                    
-                    // Update widget metrics
-                    AppDashboardMetricsService.buildAndPersist(using: context)
-                }
-                .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
-                    // Wire CarPlaySceneDelegate when it gets created
-                    Task { @MainActor in
-                        if let carPlayScene = UIApplication.shared.connectedScenes.first(where: { $0 is CPTemplateApplicationScene }),
-                           let carPlayDelegate = carPlayScene.delegate as? CarPlaySceneDelegate {
-                            carPlayDelegate.tripTrackingService = tripTrackingService
-                            carPlayDelegate.modelContext = appDelegate.modelContext
+                    .task {
+                        let context = ModelContext(container)
+                        
+                        await MainActor.run {
+                            tripTrackingService.setModelContext(context)
+                            appDelegate.tripTrackingService = tripTrackingService
+                            appDelegate.modelContext = context
+                        }
+                        
+                        AppDashboardMetricsService.buildAndPersist(using: context)
+                    }
+                    .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+                        Task { @MainActor in
+                            if let carPlayScene = UIApplication.shared.connectedScenes.first(where: { $0 is CPTemplateApplicationScene }),
+                               let carPlayDelegate = carPlayScene.delegate as? CarPlaySceneDelegate {
+                                carPlayDelegate.tripTrackingService = tripTrackingService
+                                carPlayDelegate.modelContext = appDelegate.modelContext
+                            }
                         }
                     }
-                }
+                    .modelContainer(container)
+            } else {
+                // SwiftData container failed to initialize — show recovery UI
+                DataRecoveryView()
+            }
         }
-        .modelContainer(sharedContainer)
     }
     
     // MARK: - Deep Link Handling
@@ -101,3 +106,43 @@ struct logbookApp: App {
     }
 }
 
+// MARK: - Data Recovery View
+
+struct DataRecoveryView: View {
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        VStack(spacing: 24) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 60))
+                .foregroundStyle(.orange)
+
+            Text("Data Error")
+                .font(.title.bold())
+
+            Text("Unable to initialize the app's data storage. Please close and reopen the app. If the problem persists, contact support.")
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 32)
+
+            VStack(spacing: 12) {
+                Button("Open Settings") {
+                    appLogger.error("User opened Settings from DataRecoveryView after model container failure")
+                    if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                        openURL(settingsURL)
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+
+                Text("You can also force close the app and reopen it.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .padding()
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Data error screen")
+        .accessibilityHint("Provides recovery actions when the app cannot initialize local data storage")
+    }
+}

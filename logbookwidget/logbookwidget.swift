@@ -40,6 +40,24 @@ struct WidgetSnapshot: Codable {
         )
     }
 
+    static var preview: WidgetSnapshot {
+        WidgetSnapshot(
+            userDisplayName: "Driver",
+            totalDistance: 12450,
+            totalFuel: 980.5,
+            totalSpend: 18320,
+            totalEntries: 47,
+            avgFuelEfficiency: 12.7,
+            costPerKm: 1.47,
+            avgCostPerLitre: 18.68,
+            lastFillUpDate: Date().addingTimeInterval(-172_800),
+            lastFillUpLitres: 55.2,
+            lastFillUpSpend: 1031.3,
+            lastGarageName: "Shell Foreshore",
+            recentCarLabel: "2022 Toyota Corolla"
+        )
+    }
+
     static func load() -> WidgetSnapshot {
         guard
             let defaults = UserDefaults(suiteName: appGroupID),
@@ -68,15 +86,41 @@ struct LogbookEntry: TimelineEntry {
 
 struct LogbookProvider: TimelineProvider {
     func placeholder(in context: Context) -> LogbookEntry {
-        LogbookEntry(date: .now, snapshot: .empty)
+        LogbookEntry(date: .now, snapshot: WidgetSnapshot.preview)
     }
+
     func getSnapshot(in context: Context, completion: @escaping (LogbookEntry) -> Void) {
-        completion(LogbookEntry(date: .now, snapshot: .load()))
+        let snapshot = context.isPreview ? WidgetSnapshot.preview : WidgetSnapshot.load()
+        completion(makeEntry(snapshot: snapshot, at: .now))
     }
+
     func getTimeline(in context: Context, completion: @escaping (Timeline<LogbookEntry>) -> Void) {
-        let entry   = LogbookEntry(date: .now, snapshot: .load())
-        let refresh = Calendar.current.date(byAdding: .minute, value: 15, to: .now) ?? .now
-        completion(Timeline(entries: [entry], policy: .after(refresh)))
+        let snapshot = WidgetSnapshot.load()
+        let now = Date()
+        let entry = makeEntry(snapshot: snapshot, at: now)
+        let refreshDate = nextRefreshDate(from: now, snapshot: snapshot)
+        completion(Timeline(entries: [entry], policy: .after(refreshDate)))
+    }
+
+    private func makeEntry(snapshot: WidgetSnapshot, at date: Date) -> LogbookEntry {
+        LogbookEntry(date: date, snapshot: snapshot)
+    }
+
+    /// WidgetKit best practice: provide a meaningful future refresh date,
+    /// while also letting explicit WidgetCenter reloads drive immediate updates
+    /// when app data changes.
+    private func nextRefreshDate(from now: Date, snapshot: WidgetSnapshot) -> Date {
+        if snapshot.totalEntries == 0 {
+            // Empty state changes infrequently; poll gently.
+            return Calendar.current.date(byAdding: .hour, value: 1, to: now) ?? now.addingTimeInterval(3600)
+        }
+
+        if snapshot.lastFillUpDate != nil {
+            // Active data set: keep reasonably fresh even if the app hasn't written a reload.
+            return Calendar.current.date(byAdding: .minute, value: 30, to: now) ?? now.addingTimeInterval(1800)
+        }
+
+        return Calendar.current.date(byAdding: .minute, value: 45, to: now) ?? now.addingTimeInterval(2700)
     }
 }
 

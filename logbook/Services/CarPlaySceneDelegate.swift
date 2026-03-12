@@ -1,6 +1,9 @@
 import Foundation
 import CarPlay
 import SwiftData
+import OSLog
+
+private let carPlayLogger = Logger(subsystem: "com.jb-tech.logbook", category: "CarPlay")
 
 class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
     
@@ -16,26 +19,35 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
     ) {
         self.interfaceController = interfaceController
         
-        print("🚗 CarPlay connected")
+        carPlayLogger.info("CarPlay connected")
         
         // Start trip tracking when CarPlay connects
         Task { @MainActor in
             guard let service = tripTrackingService else {
-                print("⚠️ TripTrackingService not available")
+                carPlayLogger.error("TripTrackingService not available during CarPlay connect")
                 return
             }
             
             // Get the user's current car (most recent)
             if let context = modelContext {
                 let descriptor = FetchDescriptor<Car>(sortBy: [SortDescriptor(\.year, order: .reverse)])
-                if let cars = try? context.fetch(descriptor), let currentCar = cars.first {
-                    service.startTracking(car: currentCar)
-                    print("✅ Trip tracking started for \(currentCar.year) \(currentCar.make) \(currentCar.model)")
-                } else {
-                    // Start tracking without a specific car
+                do {
+                    let cars = try context.fetch(descriptor)
+                    if let currentCar = cars.first {
+                        service.startTracking(car: currentCar)
+                        carPlayLogger.info("Trip tracking started for current vehicle")
+                    } else {
+                        service.startTracking()
+                        carPlayLogger.info("Trip tracking started without a selected vehicle")
+                    }
+                } catch {
+                    carPlayLogger.error("Failed to fetch cars on CarPlay connect: \(error)")
                     service.startTracking()
-                    print("✅ Trip tracking started (no car selected)")
+                    carPlayLogger.warning("Started trip tracking without a selected vehicle after car fetch failure")
                 }
+            } else {
+                service.startTracking()
+                carPlayLogger.warning("ModelContext unavailable on CarPlay connect — started trip tracking without vehicle context")
             }
         }
         
@@ -46,16 +58,16 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
     
     func templateApplicationScene(
         _ templateApplicationScene: CPTemplateApplicationScene,
-        didDisconnect interfaceController: CPInterfaceController
+        didDisconnectInterfaceController interfaceController: CPInterfaceController,
+        from window: CPWindow
     ) {
-        print("🚗 CarPlay disconnected")
-        
-        // Stop trip tracking when CarPlay disconnects
+        carPlayLogger.info("CarPlay disconnected")
+
         Task { @MainActor in
             tripTrackingService?.stopTracking()
-            print("✅ Trip tracking stopped")
+            carPlayLogger.info("Trip tracking stopped after CarPlay disconnect")
         }
-        
+
         self.interfaceController = nil
     }
     

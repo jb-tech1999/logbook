@@ -10,8 +10,8 @@ final class TripPoint {
     var speed: Double // km/h
     var altitude: Double? // meters
     
-    // Relationship
-    var trip: Trip?
+    // Relationship — inverse is declared on Trip.points
+    @Relationship var trip: Trip?
     
     init(
         timestamp: Date = .now,

@@ -19,15 +19,25 @@ struct CarFormView: View {
         Form {
             Section("Vehicle") {
                 TextField("Make", text: $make)
+                    .accessibilityLabel("Vehicle make")
+                    .accessibilityHint("Enter the manufacturer, for example Toyota")
                 TextField("Model", text: $model)
+                    .accessibilityLabel("Vehicle model")
+                    .accessibilityHint("Enter the model name of the vehicle")
                 TextField("Year", text: $year)
                     .keyboardType(.numberPad)
+                    .accessibilityLabel("Vehicle year")
+                    .accessibilityHint("Enter the four digit model year")
                 TextField("Registration", text: $registration)
                     .textInputAutocapitalization(.characters)
+                    .accessibilityLabel("Vehicle registration")
+                    .accessibilityHint("Enter the license plate or registration number")
             }
 
             Section("Details") {
                 TextField("Nickname (optional)", text: $nickname)
+                    .accessibilityLabel("Vehicle nickname")
+                    .accessibilityHint("Optional short name used to identify the vehicle")
             }
 
             if let errorMessage {
@@ -45,6 +55,7 @@ struct CarFormView: View {
             ToolbarItem(placement: .confirmationAction) {
                 Button("Save", action: save)
                     .disabled(isSaving)
+                    .accessibilityHint("Saves the vehicle to your garage")
             }
         }
     }

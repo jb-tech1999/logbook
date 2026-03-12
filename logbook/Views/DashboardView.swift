@@ -144,6 +144,7 @@ struct DashboardView: View {
                 }
             }
             .pickerStyle(.segmented)
+            .accessibilityHint("Changes the time range for the fuel economy chart")
 
             if fuelEconomySamples.isEmpty {
                 emptyState(text: "Not enough log data for this range yet.")
@@ -176,6 +177,8 @@ struct DashboardView: View {
                     AxisMarks(position: .leading)
                 }
                 .frame(height: 220)
+                .accessibilityLabel("Fuel economy chart")
+                .accessibilityValue(chartAccessibilitySummary)
             }
         }
         .dashboardCardStyle()
@@ -239,6 +242,8 @@ struct DashboardView: View {
                                 .foregroundColor(.secondary)
                         }
                     }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(recentLogAccessibilitySummary(for: log))
                     Divider()
                 }
             }
@@ -271,6 +276,32 @@ struct DashboardView: View {
             .foregroundColor(.secondary)
             .frame(maxWidth: .infinity, minHeight: 80, alignment: .center)
     }
+
+    private var chartAccessibilitySummary: String {
+        guard !fuelEconomySamples.isEmpty else {
+            return "No fuel economy data available for the selected range"
+        }
+
+        let efficiencies = fuelEconomySamples.map(\.efficiency)
+        let minValue = efficiencies.min() ?? 0
+        let maxValue = efficiencies.max() ?? 0
+        let latestValue = fuelEconomySamples.last?.efficiency ?? 0
+
+        return "Showing \(fuelEconomySamples.count) data points for the \(selectedTrendRange.title.lowercased()) range. Latest fuel economy is \(latestValue.formatted(.number.precision(.fractionLength(1)))) kilometers per liter. Range runs from \(minValue.formatted(.number.precision(.fractionLength(1)))) to \(maxValue.formatted(.number.precision(.fractionLength(1)))) kilometers per liter."
+        }
+
+    private func recentLogAccessibilitySummary(for log: LogEntry) -> String {
+        var parts: [String] = []
+        parts.append(log.date.formatted(date: .abbreviated, time: .omitted))
+        parts.append("Distance \(log.distanceKm.formatted(.number.precision(.fractionLength(1)))) kilometers")
+        parts.append("Speedometer \(log.speedometerKm.formatted(.number.precision(.fractionLength(0)))) kilometers")
+        parts.append("Fuel \(log.fuelLiters.formatted(.number.precision(.fractionLength(1)))) liters")
+        parts.append("Spend \(log.fuelSpend.formatted(.currency(code: Locale.current.currency?.identifier ?? "USD")))")
+        if let garage = log.garageName {
+            parts.append("Garage \(garage)")
+        }
+        return parts.joined(separator: ", ")
+    }
 }
 
 private struct DashboardMetricCard: View {
@@ -297,6 +328,8 @@ private struct DashboardMetricCard: View {
             tint.opacity(0.12),
             in: RoundedRectangle(cornerRadius: 16, style: .continuous)
         )
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(title). \(value). \(detail).")
     }
 }
 

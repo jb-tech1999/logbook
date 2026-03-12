@@ -6,6 +6,8 @@ import Charts
 struct TripDetailView: View {
     let trip: Trip
     
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    
     @State private var region: MKCoordinateRegion = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 0, longitude: 0),
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
@@ -40,11 +42,14 @@ struct TripDetailView: View {
                 } label: {
                     Image(systemName: "square.and.arrow.up")
                 }
+                .accessibilityLabel("Share trip")
+                .accessibilityHint("Share trip details via message or other apps")
             }
         }
         .sheet(isPresented: $showingShareSheet) {
             ShareSheet(activityItems: [generateTripSummary()])
         }
+        .animation(reduceMotion ? nil : .default, value: showingShareSheet)
         .onAppear {
             setupMapRegion()
         }
@@ -83,6 +88,8 @@ struct TripDetailView: View {
                                 .font(.caption)
                                 .foregroundStyle(.white)
                         }
+                        .accessibilityLabel("Trip start location")
+                        .accessibilityHint("Marks where the trip began")
                     }
                 }
                 
@@ -100,6 +107,8 @@ struct TripDetailView: View {
                                 .font(.caption)
                                 .foregroundStyle(.white)
                         }
+                        .accessibilityLabel("Trip end location")
+                        .accessibilityHint("Marks where the trip ended")
                     }
                 }
             }
@@ -195,6 +204,8 @@ struct TripDetailView: View {
             .frame(height: 200)
             .chartYAxisLabel("Speed (km/h)")
             .padding(.horizontal)
+            .accessibilityLabel("Speed over time chart")
+            .accessibilityValue("Trip speed ranged from 0 to \(Int(trip.maxSpeed)) kilometers per hour, with an average of \(Int(trip.averageSpeed)) kilometers per hour")
         }
         .padding(.vertical, 12)
         .background(.quaternary.opacity(0.3))
@@ -323,6 +334,8 @@ struct StatCard: View {
         .padding()
         .background(color.opacity(0.15))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(value)")
     }
 }
 

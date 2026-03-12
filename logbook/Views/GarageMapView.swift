@@ -23,7 +23,7 @@ private extension MapStyle {
 }
 
 struct GarageMapView: View {
-    @ObservedObject var locationManager: LocationManager
+    var locationManager: LocationManager
     let onSignOut: () -> Void
 
     @Query(sort: [SortDescriptor(\User.createdAt, order: .reverse)])
@@ -254,13 +254,17 @@ struct GarageMapView: View {
             if let coordinate = locationManager.lastKnownLocation {
                 Annotation("You", coordinate: coordinate) {
                     userAnnotation
+                        .accessibilityLabel("Your location")
+                        .accessibilityHint("Shows your current position on the map")
                 }
             }
 
             ForEach(garageSuggestions) { suggestion in
                 Annotation(suggestion.name, coordinate: suggestion.coordinate) {
                     mapAnnotation(for: suggestion)
-                }
+                        .accessibilityLabel("Garage: \(suggestion.name)")
+                        .accessibilityHint("Double tap to get directions")
+                    }
             }
 
             if let route = currentRoute {
@@ -350,6 +354,9 @@ struct GarageMapView: View {
             }
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Garage: \(suggestion.name)")
+        .accessibilityValue(suggestion.subtitle.isEmpty ? "No additional details" : suggestion.subtitle)
+        .accessibilityHint("Double tap to open navigation options")
     }
 
     private func garageListItem(for suggestion: GarageSuggestion) -> some View {
@@ -398,6 +405,10 @@ struct GarageMapView: View {
             .padding(.horizontal, 4)
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Garage: \(suggestion.name)")
+        .accessibilityValue(suggestion.subtitle.isEmpty ? (userDistanceString(to: suggestion) ?? "") : "\(suggestion.subtitle), \(userDistanceString(to: suggestion) ?? "")")
+        .accessibilityHint("Double tap to open directions")
     }
 
     private func selectedGarageActions(for suggestion: GarageSuggestion) -> some View {

@@ -1,5 +1,8 @@
 import Foundation
 import WidgetKit
+import OSLog
+
+private let widgetSnapshotLogger = Logger(subsystem: "com.jb-tech.logbook", category: "DashboardMetricsProvider")
 
 // MARK: - Snapshot storage shared between app and widget
 
@@ -43,28 +46,41 @@ struct DashboardMetricsSnapshot: Codable {
     // MARK: - Write  (main app → shared UserDefaults)
     func persist() {
         guard let defaults = UserDefaults(suiteName: Self.appGroupID) else {
-            print("⚠️ [Widget] App Group '\(Self.appGroupID)' not accessible — check Signing & Capabilities.")
+            widgetSnapshotLogger.error("App Group '\(Self.appGroupID)' not accessible — check Signing & Capabilities")
             return
         }
-        guard let data = try? JSONEncoder().encode(self) else { return }
-        defaults.set(data, forKey: Self.defaultsKey)
-        defaults.synchronize()                          // force flush before WidgetKit reads
-        WidgetCenter.shared.reloadAllTimelines()
-        let e = avgFuelEfficiency.formatted(.number.precision(.fractionLength(1)))
-        print("✅ [Widget] Persisted \(totalEntries) entries · \(e) km/L · group=\(Self.appGroupID)")
+
+        do {
+            let data = try JSONEncoder().encode(self)
+            defaults.set(data, forKey: Self.defaultsKey)
+            defaults.synchronize()                          // force flush before WidgetKit reads
+            WidgetCenter.shared.reloadAllTimelines()
+            let e = avgFuelEfficiency.formatted(.number.precision(.fractionLength(1)))
+            widgetSnapshotLogger.info("Persisted widget snapshot with \(self.totalEntries) entries and efficiency \(e) km/L")
+        } catch {
+            widgetSnapshotLogger.error("Failed to encode widget snapshot: \(error)")
+        }
     }
 
     // MARK: - Read  (widget extension ← shared UserDefaults)
     static func load() -> DashboardMetricsSnapshot {
-        guard
-            let defaults = UserDefaults(suiteName: appGroupID),
-            let data     = defaults.data(forKey: defaultsKey),
-            let snapshot = try? JSONDecoder().decode(DashboardMetricsSnapshot.self, from: data)
-        else {
-            print("⚠️ [Widget] No snapshot in '\(appGroupID)' — using placeholder.")
+        guard let defaults = UserDefaults(suiteName: appGroupID) else {
+            widgetSnapshotLogger.error("App Group '\(self.appGroupID)' not accessible when loading widget snapshot")
             return .placeholder
         }
-        print("✅ [Widget] Loaded snapshot: \(snapshot.totalEntries) entries · \(snapshot.avgFuelEfficiency) km/L")
-        return snapshot
+
+        guard let data = defaults.data(forKey: defaultsKey) else {
+            widgetSnapshotLogger.warning("No widget snapshot found in shared defaults — using placeholder")
+            return .placeholder
+        }
+
+        do {
+            let snapshot = try JSONDecoder().decode(DashboardMetricsSnapshot.self, from: data)
+            widgetSnapshotLogger.info("Loaded widget snapshot with \(snapshot.totalEntries) entries")
+            return snapshot
+        } catch {
+            widgetSnapshotLogger.error("Failed to decode widget snapshot: \(error)")
+            return .placeholder
+        }
     }
 }

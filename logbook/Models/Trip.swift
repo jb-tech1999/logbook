@@ -13,7 +13,8 @@ final class Trip {
     
     // Relationships
     var car: Car?
-    var points: [TripPoint]?
+    @Relationship(deleteRule: .cascade, inverse: \TripPoint.trip)
+    var points: [TripPoint]? = []
     
     init(
         startDate: Date = .now,

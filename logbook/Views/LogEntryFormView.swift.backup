@@ -245,7 +245,6 @@ struct LogEntryFormView: View {
 
     private func saveLog() {
         guard !isSaving else { return }
-        errorMessage = nil
 
         guard let owningUser = user ?? existingLog?.user else {
             errorMessage = "Create a user profile before logging trips."
@@ -257,8 +256,16 @@ struct LogEntryFormView: View {
             return
         }
 
-        let speedometerValue = parseDecimal(odometerReading) ?? 0
-        let distanceValue = parseDecimal(tripDistance) ?? 0
+        guard let speedometerValue = parseDecimal(odometerReading) else {
+            errorMessage = "Enter a numeric speedometer value."
+            return
+        }
+
+        guard let distanceValue = parseDecimal(tripDistance) else {
+            errorMessage = "Enter a numeric distance value."
+            return
+        }
+
         let litersValue = parseDecimal(fuelLiters) ?? 0
         let spendValue = parseDecimal(fuelSpend) ?? 0
 
@@ -297,11 +304,12 @@ struct LogEntryFormView: View {
 
         do {
             try modelContext.save()
-            logEntryFormLogger.info("Log entry saved successfully")
+            // Rebuild and persist the widget snapshot so the Home Screen
+            // widget updates immediately after every log entry is saved.
             AppDashboardMetricsService.buildAndPersist(using: modelContext)
             dismiss()
         } catch {
-            logEntryFormLogger.error("Failed to save log: \(error)")
+            logEntryFormLogger.error("Failed to save log entry: \(error.localizedDescription)")
             errorMessage = "Unable to save log: \(error.localizedDescription)"
             isSaving = false
         }
@@ -365,32 +373,12 @@ struct LogEntryFormView: View {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
 
-        // Try locale-aware parsing first (handles thousands separators, decimal commas, etc.)
         if let number = LogEntryFormView.decimalFormatter.number(from: trimmed) {
             return number.doubleValue
         }
 
-        // Try a grouping-aware formatter as fallback (e.g. "1 234,5" or "1.234,5")
-        let groupingFormatter = NumberFormatter()
-        groupingFormatter.locale = Locale.current
-        groupingFormatter.numberStyle = .decimal
-        groupingFormatter.usesGroupingSeparator = true
-        if let number = groupingFormatter.number(from: trimmed) {
-            return number.doubleValue
-        }
-
-        // Strip all non-numeric characters except digits, minus, period, and comma
-        var cleaned = trimmed.filter { $0.isNumber || $0 == "." || $0 == "," || $0 == "-" }
-        // Normalize comma to period for final Double parse
-        cleaned = cleaned.replacingOccurrences(of: ",", with: ".")
-        // If multiple dots remain (thousands separators), keep only the last as decimal
-        let parts = cleaned.split(separator: ".", omittingEmptySubsequences: false)
-        if parts.count > 2 {
-            let integerPart = parts.dropLast().joined()
-            let decimalPart = parts.last ?? ""
-            cleaned = integerPart + "." + decimalPart
-        }
-        return Double(cleaned)
+        let normalized = trimmed.replacingOccurrences(of: ",", with: ".")
+        return Double(normalized)
     }
 
     private static func formattedString(from value: Double?) -> String {

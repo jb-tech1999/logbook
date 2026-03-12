@@ -37,7 +37,7 @@ struct GarageSuggestion: Identifiable, Hashable {
 final class GarageService {
     func nearbyGarages(
         around coordinate: CLLocationCoordinate2D,
-        within radius: CLLocationDistance = 15_000
+        within radius: CLLocationDistance = 1_000
     ) async throws -> [GarageSuggestion] {
         try await searchGarages(matching: "gas station", near: coordinate, within: radius)
     }
@@ -45,7 +45,7 @@ final class GarageService {
     func searchGarages(
         matching query: String,
         near coordinate: CLLocationCoordinate2D?,
-        within radius: CLLocationDistance = 20_000
+        within radius: CLLocationDistance = 1_000
     ) async throws -> [GarageSuggestion] {
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = query

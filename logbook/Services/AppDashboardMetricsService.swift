@@ -1,6 +1,9 @@
 import Foundation
 import SwiftData
 import WidgetKit
+import OSLog
+
+private let dashboardMetricsLogger = Logger(subsystem: "com.jb-tech.logbook", category: "DashboardMetrics")
 
 /// App-only builder that reads SwiftData models and publishes a widget snapshot.
 enum AppDashboardMetricsService {
@@ -22,8 +25,22 @@ enum AppDashboardMetricsService {
             sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
         )
 
-        let logs = (try? context.fetch(logsDescriptor)) ?? []
-        let firstUser = (try? context.fetch(usersDescriptor))?.first
+        let logs: [LogEntry]
+        do {
+            logs = try context.fetch(logsDescriptor)
+        } catch {
+            dashboardMetricsLogger.error("Failed to fetch logs for widget snapshot: \(error)")
+            return DashboardMetricsSnapshot.placeholder
+        }
+
+        let firstUser: User?
+        do {
+            firstUser = try context.fetch(usersDescriptor).first
+        } catch {
+            dashboardMetricsLogger.error("Failed to fetch users for widget snapshot: \(error)")
+            firstUser = nil
+        }
+
         let userName = firstUser.map { $0.displayName.isEmpty ? "Driver" : $0.displayName } ?? "Driver"
 
         let totals = logs.reduce(into: (distance: 0.0, fuel: 0.0, spend: 0.0)) { acc, entry in

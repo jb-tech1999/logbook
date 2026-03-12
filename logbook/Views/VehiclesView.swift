@@ -1,5 +1,8 @@
 import SwiftUI
 import SwiftData
+import OSLog
+
+private let vehiclesLogger = Logger(subsystem: "com.jb-tech.logbook", category: "VehiclesView")
 
 // MARK: - VehiclesView
 
@@ -16,6 +19,7 @@ struct VehiclesView: View {
 
     @State private var isPresentingCarForm = false
     @State private var isPresentingProfileSetup = false
+    @State private var errorMessage: String?
 
     private var activeUser: User? { users.first }
 
@@ -130,10 +134,18 @@ struct VehiclesView: View {
     }
 
     private func deleteCars(at offsets: IndexSet) {
+        errorMessage = nil
+
         for index in offsets {
             modelContext.delete(cars[index])
         }
-        try? modelContext.save()
+
+        do {
+            try modelContext.save()
+        } catch {
+            vehiclesLogger.error("Failed to delete vehicle(s): \(error)")
+            errorMessage = "Unable to delete vehicle right now. Please try again."
+        }
     }
 }
 
@@ -214,14 +226,18 @@ struct ProfileSetupView: View {
             return
         }
 
+        errorMessage = nil
         isSaving = true
+        defer {
+            if errorMessage != nil {
+                isSaving = false
+            }
+        }
 
         if let user = existingUser {
-            // Update existing
             user.displayName = trimmedName
             if !trimmedEmail.isEmpty { user.email = trimmedEmail }
         } else {
-            // Create new
             let finalEmail = trimmedEmail.isEmpty ? "driver@logbook.app" : trimmedEmail
             let user = User(
                 email: finalEmail,
@@ -235,8 +251,8 @@ struct ProfileSetupView: View {
             try modelContext.save()
             dismiss()
         } catch {
+            vehiclesLogger.error("Failed to save profile: \(error)")
             errorMessage = "Could not save profile. Please try again."
-            isSaving = false
         }
     }
 }

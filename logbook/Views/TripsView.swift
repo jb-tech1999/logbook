@@ -4,7 +4,8 @@ import MapKit
 
 struct TripsView: View {
     @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var tripTrackingService: TripTrackingService
+    @Environment(TripTrackingService.self) private var tripTrackingService
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Query(sort: \Trip.startDate, order: .reverse) private var trips: [Trip]
     @Query private var cars: [Car]
     @State private var selectedTrip: Trip?
@@ -53,8 +54,11 @@ struct TripsView: View {
                 Circle()
                     .fill(.red.opacity(0.3))
                     .frame(width: 24, height: 24)
-                    .scaleEffect(tripTrackingService.isTracking ? 1.5 : 1.0)
-                    .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: tripTrackingService.isTracking)
+                    .scaleEffect(tripTrackingService.isTracking ? (reduceMotion ? 1.0 : 1.5) : 1.0)
+                    .animation(
+                        reduceMotion ? nil : .easeInOut(duration: 1.0).repeatForever(autoreverses: true),
+                        value: tripTrackingService.isTracking
+                    )
             }
             
             VStack(alignment: .leading, spacing: 2) {
@@ -74,6 +78,9 @@ struct TripsView: View {
         }
         .padding()
         .background(.red.opacity(0.1))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Active trip in progress")
+        .accessibilityValue("\(tripTrackingService.distanceTraveled.formatted(.number.precision(.fractionLength(1)))) kilometers traveled, current speed \(tripTrackingService.currentSpeed.formatted(.number.precision(.fractionLength(0)))) kilometers per hour")
     }
     
     private var tripControlSection: some View {
@@ -98,6 +105,8 @@ struct TripsView: View {
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
+                .accessibilityLabel("Start new trip")
+                .accessibilityHint("Begins recording a new trip")
             }
         }
         .padding(.horizontal)
@@ -194,6 +203,8 @@ struct TripsView: View {
                     .foregroundStyle(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
+            .accessibilityLabel("Start new trip")
+            .accessibilityHint("Begins recording a new trip")
             .padding(.horizontal, 32)
             .padding(.bottom, 32)
         }
@@ -318,6 +329,28 @@ struct TripRowView: View {
             }
         }
         .padding(.vertical, 4)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilitySummary)
+        .accessibilityHint("Double tap to view trip details")
+    }
+    
+    private var accessibilitySummary: String {
+        var parts: [String] = []
+        parts.append(trip.isActive ? "Active trip" : "Completed trip")
+        parts.append(trip.startDate.formatted(date: .abbreviated, time: .omitted))
+        parts.append("\(trip.totalDistance.formatted(.number.precision(.fractionLength(1)))) kilometers")
+        parts.append("Duration \(trip.durationFormatted)")
+
+        if !trip.isActive {
+            parts.append("Average speed \(trip.averageSpeed.formatted(.number.precision(.fractionLength(0)))) kilometers per hour")
+            parts.append("Maximum speed \(trip.maxSpeed.formatted(.number.precision(.fractionLength(0)))) kilometers per hour")
+        }
+
+        if let car = trip.car {
+            parts.append("Vehicle \(car.year) \(car.make) \(car.model)")
+        }
+
+        return parts.joined(separator: ", ")
     }
 }
 

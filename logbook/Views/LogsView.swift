@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct LogsView: View {
-    @ObservedObject var locationManager: LocationManager
+    var locationManager: LocationManager
     let onSignOut: () -> Void
 
     @Environment(\.modelContext) private var context
@@ -16,7 +16,8 @@ struct LogsView: View {
     @Query(sort: [SortDescriptor(\User.createdAt, order: .reverse)])
     private var users: [User]
 
-    @State private var isPresentingForm = false
+    @State private var editMode: EditMode = .inactive
+    @State private var isPresentingAddForm = false
     @State private var logToEdit: LogEntry?
 
     var body: some View {
@@ -31,7 +32,6 @@ struct LogsView: View {
                 ForEach(logs) { log in
                     Button {
                         logToEdit = log
-                        isPresentingForm = true
                     } label: {
                         LogRow(log: log)
                     }
@@ -39,7 +39,6 @@ struct LogsView: View {
                     .swipeActions(edge: .leading, allowsFullSwipe: false) {
                         Button {
                             logToEdit = log
-                            isPresentingForm = true
                         } label: {
                             Label("Edit", systemImage: "pencil")
                         }
@@ -56,8 +55,7 @@ struct LogsView: View {
                 EditButton()
 
                 Button {
-                    logToEdit = nil
-                    isPresentingForm = true
+                    isPresentingAddForm = true
                 } label: {
                     Label("Add Log", systemImage: "plus")
                 }
@@ -65,13 +63,23 @@ struct LogsView: View {
                 Button("Sign Out", role: .destructive, action: onSignOut)
             }
         }
-        .sheet(isPresented: $isPresentingForm, onDismiss: { logToEdit = nil }) {
+        .sheet(isPresented: $isPresentingAddForm) {
             NavigationStack {
                 LogEntryFormView(
                     user: activeUser,
                     cars: cars,
                     locationManager: locationManager,
-                    log: logToEdit
+                    log: nil
+                )
+            }
+        }
+        .sheet(item: $logToEdit) { log in
+            NavigationStack {
+                LogEntryFormView(
+                    user: activeUser,
+                    cars: cars,
+                    locationManager: locationManager,
+                    log: log
                 )
             }
         }
